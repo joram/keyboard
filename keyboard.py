@@ -2,7 +2,7 @@ import time
 import board
 import digitalio
 import usb_hid
-from keys import BaseKey, VARIABLE_NAMES
+from keys_right import VARIABLE_NAMES
 
 DIOS = {}
 

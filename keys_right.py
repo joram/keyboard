@@ -1,38 +1,12 @@
 from keycode import Keycode
 import board
 
-# Test if MOSI exists and can be used
-# On KB2040, MOSI is typically GP19, but may not be available as board.MOSI
-# Try to find it, or use an alternative GPIO pin
-try:
-    test_mosi = board.MOSI
-    print(f"board.MOSI found: {test_mosi}")
-    ROW_PIN_6_PIN = board.MOSI
-except AttributeError:
-    print("board.MOSI not found, trying alternatives...")
-    # Try alternative pin names
-    try:
-        test_mosi = board.SPI_MOSI
-        print(f"board.SPI_MOSI found: {test_mosi}")
-        ROW_PIN_6_PIN = board.SPI_MOSI
-    except AttributeError:
-        # Try using GP19 directly (MOSI on KB2040)
-        try:
-            test_mosi = board.GP19
-            print(f"Using board.GP19 as ROW_PIN_6 (MOSI equivalent)")
-            ROW_PIN_6_PIN = board.GP19
-        except AttributeError:
-            print("ERROR: Could not find MOSI pin or GP19!")
-            print("You may need to use a different GPIO pin for ROW_PIN_6")
-            # Fallback to a pin that should exist
-            ROW_PIN_6_PIN = board.GP19  # This will raise an error if it doesn't exist
-
 ROW_PIN_1=board.A3
 ROW_PIN_2=board.A2
 ROW_PIN_3=board.A1
 ROW_PIN_4=board.A0
 ROW_PIN_5=board.CLK
-ROW_PIN_6=ROW_PIN_6_PIN
+ROW_PIN_6=board.MISO
 
 COL_PIN_1=board.D2
 COL_PIN_2=board.D3
@@ -47,7 +21,7 @@ VARIABLE_NAMES = {
     board.A1: "ROW_PIN_3",
     board.A0: "ROW_PIN_4",
     board.CLK: "ROW_PIN_5",
-    ROW_PIN_6: "ROW_PIN_6",  # Use the variable instead of board.MOSI
+    board.MISO: "ROW_PIN_6",
 
     board.D2: "COL_PIN_1",
     board.D3: "COL_PIN_2",
@@ -174,7 +148,6 @@ KEY_COMMA = BaseKey(keycode=Keycode.COMMA, row_pin=ROW_PIN_4, col_pin=COL_PIN_3)
 KEY_PERIOD = BaseKey(keycode=Keycode.PERIOD, row_pin=ROW_PIN_4, col_pin=COL_PIN_4)
 KEY_OPEN_BRACKET = BaseKey(keycode=Keycode.LEFT_BRACKET, row_pin=ROW_PIN_5, col_pin=COL_PIN_5)
 KEY_CLOSE_BRACKET = BaseKey(keycode=Keycode.RIGHT_BRACKET, row_pin=ROW_PIN_5, col_pin=COL_PIN_6)
-KEY_SPACE = BaseKey(keycode=Keycode.SPACE, row_pin=ROW_PIN_6, col_pin=COL_PIN_6)
 
 KEY_LEFT_ARROW = BaseKey(keycode=Keycode.LEFT_ARROW, row_pin=ROW_PIN_5, col_pin=COL_PIN_2)
 KEY_UP_ARROW = BaseKey(keycode=Keycode.UP_ARROW, row_pin=ROW_PIN_5, col_pin=COL_PIN_3)
@@ -182,16 +155,17 @@ KEY_RIGHT_ARROW = BaseKey(keycode=Keycode.RIGHT_ARROW, row_pin=ROW_PIN_5, col_pi
 KEY_FORWARD_SLASH = BaseKey(keycode=Keycode.FORWARD_SLASH, row_pin=ROW_PIN_1, col_pin=COL_PIN_5)
 KEY_BACKSLASH = BaseKey(keycode=Keycode.BACKSLASH, row_pin=ROW_PIN_1, col_pin=COL_PIN_6)
 
+KEY_SPACE = BaseKey(keycode=Keycode.SPACE, row_pin=ROW_PIN_6, col_pin=COL_PIN_2)
+KEY_DOWN_ARROW = BaseKey(keycode=Keycode.DOWN_ARROW, row_pin=ROW_PIN_6, col_pin=COL_PIN_3)
+KEY_DELETE = BaseKey(keycode=Keycode.DELETE, row_pin=ROW_PIN_6, col_pin=COL_PIN_4)
+KEY_FORWARD_SLASH = BaseKey(keycode=Keycode.FORWARD_SLASH, row_pin=ROW_PIN_6, col_pin=COL_PIN_5)
+KEY_BACKSLASH = BaseKey(keycode=Keycode.BACKSLASH, row_pin=ROW_PIN_6, col_pin=COL_PIN_6)
+
 RIGHT_KEYS = [
     KEY_6, KEY_7, KEY_8, KEY_9, KEY_0, KEY_MINUS,
     KEY_Y, KEY_U, KEY_I, KEY_O, KEY_P, KEY_EQUALS,
     KEY_H, KEY_J, KEY_K, KEY_L, KEY_SEMICOLON, KEY_QUOTE,
     KEY_N, KEY_M, KEY_COMMA, KEY_PERIOD, KEY_OPEN_BRACKET, KEY_CLOSE_BRACKET, KEY_SPACE,
     KEY_LEFT_ARROW, KEY_UP_ARROW, KEY_RIGHT_ARROW, KEY_FORWARD_SLASH, KEY_BACKSLASH,
-    KEY_SPACE,
-    # KEY_U,
-    # KEY_7, KEY_8, KEY_9, KEY_0, MINUS, EQUALS, BACKSPACE, # Row 1
-    # KEY_Y, KEY_U, KEY_I, KEY_O, KEY_P, OPEN_BRACKET, CLOSE_BRACKET, BACKSLASH, # Row 2
-    # KEY_H, KEY_J, KEY_K, KEY_L, SEMICOLON, QUOTE, ENTER, # Row 3
-    # KEY_N, KEY_M, COMMA, PERIOD, FORWARD_SLASH, # Row 4
+    KEY_SPACE, KEY_DOWN_ARROW, KEY_DELETE,KEY_FORWARD_SLASH, KEY_BACKSLASH,
 ]
