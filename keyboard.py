@@ -19,13 +19,27 @@ class KeyboardRow():
 
 
     def find_pressed_keys(self):
+        # Set row LOW to activate it
         self.row_dio.value = False
+        # Small delay to allow signal to stabilize
+        time.sleep(0.0001)
 
+        # Read all column states while row is LOW
+        # Store states first to ensure atomic reading
+        col_states = {}
         for key in self.keys:
-            if not key.col_dio.value:                
-                key.check_pressed_state()
+            col_states[key] = key.col_dio.value
+        
+        # Now process the states
+        for key, col_state in col_states.items():
+            # Column reads LOW (False) when key is pressed (row LOW + key pressed = column LOW)
+            if not col_state:  # Only check if column is LOW
+                key.check_pressed_state(col_state)
 
+        # Set row HIGH to deactivate it
         self.row_dio.value = True
+        # Small delay to ensure row is fully HIGH before next scan
+        time.sleep(0.01)
 
 
 class Keyboard():
@@ -37,26 +51,16 @@ class Keyboard():
                 keys_by_row[key.row_pin] = []
             keys_by_row[key.row_pin].append(key)
         self.rows = [KeyboardRow(row_pin, keys) for row_pin in keys_by_row]
-
-        # init all the pins
-        col_pins = set([key.col_pin for key in keys])
-        row_pins = set([key.row_pin for key in keys])
-
-        for col_pin in col_pins:
-            try:
-                col_dio = digitalio.DigitalInOut(col_pin)
-                col_dio.direction = digitalio.Direction.INPUT
-                col_dio.pull = digitalio.Pull.UP
-            except Exception as e:
-                print(f"ERROR: Failed to initialize col pin {col_pin}: {e}")
+        
+        # Column pins are already initialized by BaseKey._get_dio() when keys are created
+        # No need to initialize them again here
 
 
     def run(self):
         while True:
-
-            # pull down all rows
+            # Ensure all rows start HIGH before scanning
             for row in self.rows:
-                row.row_dio.value = False
+                row.row_dio.value = True
 
             # find pressed keys
             for row in self.rows:

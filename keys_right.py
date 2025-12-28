@@ -133,9 +133,13 @@ class BaseKey():
         cls.PINS[pin].pull = digitalio.Pull.UP
         return cls.PINS[pin]
 
-    def check_pressed_state(self):
+    def check_pressed_state(self, col_state=None):
         previous_pressed = self.pressed
-        pressed = not self.col_dio.value
+        # If col_state is provided, use it; otherwise read from pin
+        if col_state is None:
+            col_state = self.col_dio.value
+        # Column reads LOW (False) when key is pressed
+        pressed = not col_state
         if pressed != previous_pressed:
             self.pressed = pressed
             if pressed:
