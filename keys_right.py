@@ -1,5 +1,6 @@
 from keycode import Keycode
 import board
+import digitalio
 
 ROW_PIN_1=board.A3
 ROW_PIN_2=board.A2
@@ -14,6 +15,7 @@ COL_PIN_3=board.D4
 COL_PIN_4=board.D5
 COL_PIN_5=board.D6
 COL_PIN_6=board.D7
+
 
 VARIABLE_NAMES = {
     board.A3: "ROW_PIN_1",
@@ -32,6 +34,8 @@ VARIABLE_NAMES = {
 }
 
 class BaseKey():
+
+    PINS = {}
 
     def _keycode_to_name(self, keycode):
         return {
@@ -117,41 +121,36 @@ class BaseKey():
         self.keycode = keycode
         self.row_pin = row_pin
         self.col_pin = col_pin
+        self.col_dio = self._get_dio(col_pin)
+        self.pressed = False
+
+    @classmethod
+    def _get_dio(cls, pin):
+        if pin in cls.PINS:
+            return cls.PINS[pin]
+        cls.PINS[pin] = digitalio.DigitalInOut(pin)
+        cls.PINS[pin].direction = digitalio.Direction.INPUT
+        cls.PINS[pin].pull = digitalio.Pull.UP
+        return cls.PINS[pin]
+
+    def check_pressed_state(self):
+        previous_pressed = self.pressed
+        pressed = not self.col_dio.value
+        if pressed != previous_pressed:
+            self.pressed = pressed
+            if pressed:
+                self.keypress()
+            else:
+                self.keyrelease()
+                
 
 
-    def keypress(self, hid_keyboard):
+    def keypress(self):
         print(f"Key pressed: {self.name}")
-        # Check if this is a modifier key that should be held
-        is_modifier = (self.keycode in [
-            Keycode.LEFT_SHIFT, Keycode.RIGHT_SHIFT,
-            Keycode.LEFT_CONTROL, Keycode.RIGHT_CONTROL,
-            Keycode.LEFT_ALT, Keycode.RIGHT_ALT,
-            Keycode.LEFT_GUI, Keycode.RIGHT_GUI,
-            Keycode.SHIFT, Keycode.CONTROL,
-        ])
-        
-        if is_modifier:
-            # Modifier key: press and hold
-            hid_keyboard.press(self.keycode)
-        else:
-            # Regular key: press and release immediately
-            hid_keyboard.send(self.keycode)
 
-    def keyrelease(self, hid_keyboard):
-        print(f"Key released: {self.name}")
-        # Check if this is a modifier key
-        is_modifier = (self.keycode in [
-            Keycode.LEFT_SHIFT, Keycode.RIGHT_SHIFT,
-            Keycode.LEFT_CONTROL, Keycode.RIGHT_CONTROL,
-            Keycode.LEFT_ALT, Keycode.RIGHT_ALT,
-            Keycode.LEFT_GUI, Keycode.RIGHT_GUI,
-            Keycode.SHIFT, Keycode.CONTROL,
-        ])
-        
-        if is_modifier:
-            # Modifier key: release it
-            hid_keyboard.release(self.keycode)
-        # Regular keys are already released by send(), so no action needed
+    def keyrelease(self):
+        # print(f"Key released: {self.name}")
+        pass
 
 
 KEY_6 = BaseKey(keycode=Keycode.SIX, row_pin=ROW_PIN_1, col_pin=COL_PIN_1)
