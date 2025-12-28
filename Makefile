@@ -1,2 +1,2 @@
 screen:
-	sudo screen /dev/ttyACM0 115200
+	sudo screen /dev/ttyACM1 115200

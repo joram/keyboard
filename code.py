@@ -1,5 +1,6 @@
 from keyboard import Keyboard
 from keys_right import RIGHT_KEYS
+from keys_left import LEFT_KEYS
 
 def get_keys():
     SIDE = "right"

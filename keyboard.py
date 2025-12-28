@@ -2,6 +2,7 @@ import time
 import board
 import digitalio
 import usb_hid
+from adafruit_hid.keyboard import Keyboard as HIDKeyboard
 from keys_right import VARIABLE_NAMES
 
 DIOS = {}
@@ -39,6 +40,11 @@ class Keyboard():
         self.COL_PINS = []
         self.ALL_PINS = []
         self.CURR_KEY_STATES = {}
+        
+        # Initialize USB HID keyboard
+        print("Initializing USB HID keyboard...")
+        self.hid_keyboard = HIDKeyboard(usb_hid.devices)
+        print("USB HID keyboard ready!")
 
         
         # Initialize digital I/O for all pins
@@ -72,8 +78,8 @@ class Keyboard():
             self.CURR_KEY_STATES[key] = False
 
         print(f"Keyboard initialized. Rows: {len(self.ROW_PINS)}, Cols: {len(self.COL_PINS)}")
-    def run(self):
 
+    def run(self):
         while True:
             self.tick()
             time.sleep(0.01)
@@ -100,10 +106,10 @@ class Keyboard():
                         continue
 
                     if key_pressed and not self.CURR_KEY_STATES.get(key):
-                        key.keypress()
+                        key.keypress(self.hid_keyboard)
                         self.CURR_KEY_STATES[key] = True
                     elif not key_pressed and self.CURR_KEY_STATES.get(key):
-                        key.keyrelease()
+                        key.keyrelease(self.hid_keyboard)
                         self.CURR_KEY_STATES[key] = False
                 
                 row_dio.value = True
@@ -116,3 +122,4 @@ class Keyboard():
                         DIOS[row_pin].value = True
                 except:
                     pass
+                raise

@@ -105,6 +105,11 @@ class BaseKey():
             Keycode.MINUS: "Minus",
             Keycode.EQUALS: "Equals",
             Keycode.CAPS_LOCK: "Caps Lock",
+            Keycode.POUND: "Pound",
+            Keycode.APPLICATION: "Super",
+            Keycode.SHIFT: "Shift",
+            Keycode.CONTROL: "Control",
+            Keycode.LEFT_ALT: "Alt",
         }[keycode]
     
     def __init__(self, keycode, row_pin, col_pin):
@@ -114,11 +119,39 @@ class BaseKey():
         self.col_pin = col_pin
 
 
-    def keypress(self):
+    def keypress(self, hid_keyboard):
         print(f"Key pressed: {self.name}")
+        # Check if this is a modifier key that should be held
+        is_modifier = (self.keycode in [
+            Keycode.LEFT_SHIFT, Keycode.RIGHT_SHIFT,
+            Keycode.LEFT_CONTROL, Keycode.RIGHT_CONTROL,
+            Keycode.LEFT_ALT, Keycode.RIGHT_ALT,
+            Keycode.LEFT_GUI, Keycode.RIGHT_GUI,
+            Keycode.SHIFT, Keycode.CONTROL,
+        ])
+        
+        if is_modifier:
+            # Modifier key: press and hold
+            hid_keyboard.press(self.keycode)
+        else:
+            # Regular key: press and release immediately
+            hid_keyboard.send(self.keycode)
 
-    def keyrelease(self):
+    def keyrelease(self, hid_keyboard):
         print(f"Key released: {self.name}")
+        # Check if this is a modifier key
+        is_modifier = (self.keycode in [
+            Keycode.LEFT_SHIFT, Keycode.RIGHT_SHIFT,
+            Keycode.LEFT_CONTROL, Keycode.RIGHT_CONTROL,
+            Keycode.LEFT_ALT, Keycode.RIGHT_ALT,
+            Keycode.LEFT_GUI, Keycode.RIGHT_GUI,
+            Keycode.SHIFT, Keycode.CONTROL,
+        ])
+        
+        if is_modifier:
+            # Modifier key: release it
+            hid_keyboard.release(self.keycode)
+        # Regular keys are already released by send(), so no action needed
 
 
 KEY_6 = BaseKey(keycode=Keycode.SIX, row_pin=ROW_PIN_1, col_pin=COL_PIN_1)
